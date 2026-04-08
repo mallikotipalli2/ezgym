@@ -1,0 +1,144 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    overscroll-behavior-y: contain;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  /* ── Dark mode (default) ── */
+  html.dark body,
+  html.dark {
+    background-color: #0f0f14;
+    color: #f4f4f5;
+  }
+
+  /* ── Light mode ── */
+  html.light body,
+  html.light {
+    background-color: #ffffff;
+    color: #18181b;
+  }
+
+  /* Light mode — surface backgrounds */
+  .light .bg-surface-950 { background-color: #ffffff !important; }
+  .light .bg-surface-900 { background-color: #f9fafb !important; }
+  .light .bg-surface-850 { background-color: #f3f4f6 !important; }
+  .light .bg-surface-800 { background-color: #e5e7eb !important; }
+  .light .bg-surface-700 { background-color: #d1d5db !important; }
+
+  /* Light mode — surface backgrounds with opacity */
+  .light .bg-surface-900\/95 { background-color: rgba(249, 250, 251, 0.97) !important; }
+  .light .bg-surface-800\/60 { background-color: rgba(229, 231, 235, 0.6) !important; }
+  .light .bg-surface-800\/50 { background-color: rgba(229, 231, 235, 0.5) !important; }
+
+  /* Light mode — borders */
+  .light .border-surface-800 { border-color: #e5e7eb !important; }
+  .light .border-surface-700 { border-color: #d1d5db !important; }
+  .light .border-surface-600 { border-color: #9ca3af !important; }
+
+  /* Light mode — ALL text colors properly mapped */
+  .light .text-white { color: #111827 !important; }
+  .light .text-surface-300 { color: #4b5563 !important; }
+  .light .text-surface-400 { color: #6b7280 !important; }
+  .light .text-surface-500 { color: #9ca3af !important; }
+  .light .text-surface-600 { color: #d1d5db !important; }
+
+  /* Light mode — placeholder text */
+  .light .placeholder\:text-surface-500::placeholder { color: #9ca3af !important; }
+  .light .placeholder\:text-surface-600::placeholder { color: #d1d5db !important; }
+
+  /* Light mode — input fields */
+  .light input,
+  .light textarea {
+    color: #111827 !important;
+  }
+  .light input::placeholder,
+  .light textarea::placeholder {
+    color: #9ca3af !important;
+  }
+
+  /* Light mode — focus ring stays brand-colored */
+  .light .focus\:ring-brand-500\/50:focus { --tw-ring-color: rgba(99, 102, 241, 0.3) !important; }
+  .light .focus\:ring-brand-500\/40:focus { --tw-ring-color: rgba(99, 102, 241, 0.25) !important; }
+
+  /* Light mode — nav bar */
+  .light .bg-surface-900\/95 {
+    background-color: rgba(255, 255, 255, 0.97) !important;
+    border-color: #e5e7eb !important;
+  }
+
+  /* Light mode — gradient text/backgrounds */
+  .light .from-surface-850 { --tw-gradient-from: #f3f4f6 !important; }
+  .light .to-surface-900 { --tw-gradient-to: #f9fafb !important; }
+
+  /* Light mode — scrollbar */
+  .light ::-webkit-scrollbar-thumb { background: #d1d5db; }
+  .light ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+  /* Light mode — backdrop blur */
+  .light .backdrop-blur-xl { backdrop-filter: blur(24px); }
+  .light .backdrop-blur-sm { backdrop-filter: blur(4px); }
+
+  /* Light mode — modals */
+  .light .bg-black\/60 { background-color: rgba(0, 0, 0, 0.3) !important; }
+
+  /* Hide scrollbar but keep scroll */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Number input arrows */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
+
+@layer utilities {
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+/* Custom scrollbar for desktop */
+@media (hover: hover) {
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #3f3f46;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #52525b;
+  }
+}
