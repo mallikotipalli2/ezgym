@@ -1,7 +1,21 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import bcrypt from 'bcryptjs';
-import { extractUser } from './me';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'ezgym-secret-key-change-in-production';
+
+function extractUser(req: VercelRequest): { userId: string; username: string } | null {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
+  try {
+    const token = authHeader.split(' ')[1];
+    const payload = jwt.verify(token, JWT_SECRET) as { userId: string; username: string };
+    return payload;
+  } catch {
+    return null;
+  }
+}
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
