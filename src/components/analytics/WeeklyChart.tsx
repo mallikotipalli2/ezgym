@@ -54,7 +54,7 @@ export const WeeklyChart = ({ data }: WeeklyChartProps) => {
         </ResponsiveContainer>
       </div>
 
-      <div className="flex justify-between mt-3 pt-3 border-t border-surface-800">
+      <div className="flex justify-between mt-3 pt-3 border-t border-surface-700">
         <div>
           <span className="text-xs text-surface-400">Workouts</span>
           <p className="text-lg font-bold text-white">

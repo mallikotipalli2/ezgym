@@ -115,7 +115,7 @@ export const Profile = () => {
           <h3 className="text-sm font-semibold">Account</h3>
 
           {isAuthenticated ? (
-            <Card padding="none" className="divide-y divide-surface-800 overflow-hidden">
+            <Card padding="none" className="divide-y divide-surface-700 overflow-hidden">
               <button
                 onClick={() => setShowChangePassword(true)}
                 className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-surface-800/50 active:bg-surface-800/70 transition-colors"
@@ -329,7 +329,7 @@ const AuthForm = ({ onClose }: { onClose: () => void }) => {
 
       <div className="relative py-1">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-surface-700" />
+          <div className="w-full border-t border-surface-600" />
         </div>
         <div className="relative flex justify-center">
           <span className="bg-surface-900 px-3 text-xs text-surface-500">or</span>

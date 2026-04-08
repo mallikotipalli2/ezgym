@@ -49,6 +49,8 @@
   .light .border-surface-800 { border-color: #e5e7eb !important; }
   .light .border-surface-700 { border-color: #d1d5db !important; }
   .light .border-surface-600 { border-color: #9ca3af !important; }
+  .light .divide-surface-800 > :not([hidden]) ~ :not([hidden]) { border-color: #e5e7eb !important; }
+  .light .divide-surface-700 > :not([hidden]) ~ :not([hidden]) { border-color: #d1d5db !important; }
 
   /* Light mode — ALL text colors properly mapped */
   .light .text-white { color: #111827 !important; }

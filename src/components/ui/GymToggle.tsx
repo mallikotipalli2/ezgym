@@ -55,28 +55,27 @@ export const GymToggle = () => {
         whileTap={{ scale: 0.92 }}
         onClick={handleToggle}
         className={`
-          relative flex items-center gap-1.5 h-9 rounded-xl border text-xs font-bold
+          relative flex items-center gap-1.5 rounded-xl border font-bold
           transition-all duration-300 overflow-hidden
           ${isAtGym
-            ? 'bg-gradient-to-r from-emerald-500/20 to-green-500/20 border-emerald-500/50 text-emerald-400 pl-2.5 pr-3'
-            : 'bg-surface-800 border-surface-700 text-surface-400 hover:text-white hover:border-surface-500 px-2.5'
+            ? 'bg-gradient-to-r from-red-500/15 to-rose-500/15 border-red-500/40 px-3 h-10'
+            : 'bg-surface-800 border-surface-700 text-surface-400 hover:text-white hover:border-surface-500 px-2.5 h-9 text-xs'
           }
         `}
       >
         {isAtGym ? (
           <>
             <motion.div
-              className="w-2 h-2 rounded-full bg-emerald-400"
-              animate={{ opacity: [1, 0.3, 1] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
+              className="w-2.5 h-2.5 rounded-full bg-red-400 flex-shrink-0"
+              animate={{ opacity: [1, 0.3, 1], scale: [1, 0.85, 1] }}
+              transition={{ duration: 1.2, repeat: Infinity }}
             />
-            <span className="whitespace-nowrap">@GYM</span>
-            <span className="font-mono text-[11px] text-red-400 tabular-nums ml-0.5">
+            <span className="font-mono text-lg text-red-400 font-extrabold tabular-nums whitespace-nowrap tracking-tight">
               {formatStopwatch(elapsedMs)}
             </span>
           </>
         ) : (
-          <span>@GYM</span>
+          <span className="text-xs">@GYM</span>
         )}
       </motion.button>
 

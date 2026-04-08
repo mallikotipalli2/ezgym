@@ -67,7 +67,7 @@ export const GymTimeCard = () => {
         <div className="space-y-1.5">
           <p className="text-xs text-surface-500 font-medium">Recent Sessions</p>
           {sessions.slice(0, 5).map((s) => (
-            <div key={s.id} className="flex items-center justify-between py-1.5 border-t border-surface-800">
+            <div key={s.id} className="flex items-center justify-between py-1.5 border-t border-surface-700">
               <div className="flex items-center gap-2">
                 <Clock size={13} className="text-surface-500" />
                 <span className="text-xs text-surface-400">{formatDate(s.startedAt)}</span>
