@@ -6,6 +6,11 @@ import { useSyncListener } from '@/hooks/useSyncListener';
 import { formatDate } from '@/lib/utils';
 import type { GymSession } from '@/types';
 
+function formatTime24(date: string | Date): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
 function formatDuration(ms: number): string {
   const totalMin = Math.floor(ms / 60000);
   if (totalMin < 60) return `${totalMin}m`;
@@ -70,7 +75,9 @@ export const GymTimeCard = () => {
             <div key={s.id} className="flex items-center justify-between py-1.5 border-t border-surface-700">
               <div className="flex items-center gap-2">
                 <Clock size={13} className="text-surface-500" />
-                <span className="text-xs text-surface-400">{formatDate(s.startedAt)}</span>
+                <span className="text-xs text-surface-400">
+                  {formatDate(s.startedAt)}, {formatTime24(s.startedAt)}
+                </span>
               </div>
               <span className="text-xs font-semibold text-white">{formatDuration(s.durationMs)}</span>
             </div>
