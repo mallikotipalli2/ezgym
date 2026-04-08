@@ -79,6 +79,16 @@ export interface PersonalRecord {
   date: string;
 }
 
+export interface GymSession {
+  id: string;
+  userId?: string;
+  startedAt: string;
+  endedAt?: string;
+  durationMs: number;
+  status: 'active' | 'completed' | 'discarded';
+  synced?: boolean;
+}
+
 export interface StreakData {
   current: number;
   longest: number;

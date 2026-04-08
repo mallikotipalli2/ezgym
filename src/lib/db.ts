@@ -1,11 +1,12 @@
 import Dexie, { type EntityTable } from 'dexie';
-import type { Workout, Exercise, WorkoutSet, Profile } from '@/types';
+import type { Workout, Exercise, WorkoutSet, Profile, GymSession } from '@/types';
 
 class EzGymDB extends Dexie {
   workouts!: EntityTable<Workout, 'id'>;
   exercises!: EntityTable<Exercise, 'id'>;
   sets!: EntityTable<WorkoutSet, 'id'>;
   profiles!: EntityTable<Profile, 'id'>;
+  gymSessions!: EntityTable<GymSession, 'id'>;
 
   constructor() {
     super('ezgym');
@@ -15,6 +16,14 @@ class EzGymDB extends Dexie {
       exercises: 'id, workoutId, name, category, order, synced',
       sets: 'id, exerciseId, workoutId, synced',
       profiles: 'id, synced',
+    });
+
+    this.version(2).stores({
+      workouts: 'id, userId, type, status, startedAt, completedAt, synced',
+      exercises: 'id, workoutId, name, category, order, synced',
+      sets: 'id, exerciseId, workoutId, synced',
+      profiles: 'id, synced',
+      gymSessions: 'id, userId, status, startedAt, synced',
     });
   }
 }
@@ -131,4 +140,29 @@ export const getUnsyncedExercises = async (): Promise<Exercise[]> => {
 
 export const getUnsyncedSets = async (): Promise<WorkoutSet[]> => {
   return db.sets.where('synced').equals(0).toArray();
+};
+
+// Gym session operations
+export const getActiveGymSession = async (): Promise<GymSession | undefined> => {
+  return db.gymSessions.where('status').equals('active').first();
+};
+
+export const createGymSession = async (session: GymSession): Promise<void> => {
+  await db.gymSessions.add(session);
+};
+
+export const updateGymSession = async (id: string, changes: Partial<GymSession>): Promise<void> => {
+  await db.gymSessions.update(id, { ...changes, synced: false });
+};
+
+export const getCompletedGymSessions = async (): Promise<GymSession[]> => {
+  return db.gymSessions
+    .where('status')
+    .equals('completed')
+    .reverse()
+    .sortBy('startedAt');
+};
+
+export const getAllGymSessions = async (): Promise<GymSession[]> => {
+  return db.gymSessions.toArray();
 };

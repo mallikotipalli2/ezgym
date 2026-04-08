@@ -54,16 +54,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .select('*')
         .eq('user_id', user.userId);
 
+      const { data: gymSessions } = await supabase
+        .from('gym_sessions')
+        .select('*')
+        .eq('user_id', user.userId)
+        .order('started_at', { ascending: false });
+
       return res.status(200).json({
         workouts: workouts || [],
         exercises: exercises || [],
         sets: sets || [],
+        gymSessions: gymSessions || [],
       });
     }
 
     if (req.method === 'PUT') {
       // Upsert workouts, exercises, and sets
-      const { workouts, exercises, sets } = req.body || {};
+      const { workouts, exercises, sets, gymSessions } = req.body || {};
 
       if (workouts?.length) {
         const mapped = workouts.map((w: any) => ({
@@ -106,6 +113,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           completed_at: s.completedAt || null,
         }));
         await supabase.from('workout_sets').upsert(mapped, { onConflict: 'id' });
+      }
+
+      if (gymSessions?.length) {
+        const mapped = gymSessions.map((g: any) => ({
+          id: g.id,
+          user_id: user.userId,
+          started_at: g.startedAt,
+          ended_at: g.endedAt || null,
+          duration_ms: g.durationMs || 0,
+          status: g.status,
+        }));
+        await supabase.from('gym_sessions').upsert(mapped, { onConflict: 'id' });
       }
 
       return res.status(200).json({ ok: true });

@@ -23,7 +23,7 @@ export const StatsCard = ({ totalWorkouts, totalVolume, streak, memberSince }: S
       icon: Calendar,
       label: 'Member Since',
       value: memberSince
-        ? new Date(memberSince).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+        ? new Date(memberSince).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
         : 'Today',
       color: 'text-green-400',
     },
@@ -34,7 +34,7 @@ export const StatsCard = ({ totalWorkouts, totalVolume, streak, memberSince }: S
       {stats.map((stat) => (
         <Card key={stat.label} padding="md">
           <stat.icon size={18} className={stat.color} />
-          <p className="text-xl font-bold text-white mt-2">{stat.value}</p>
+          <p className="text-lg font-bold text-white mt-2 truncate">{stat.value}</p>
           <p className="text-xs text-surface-400">{stat.label}</p>
         </Card>
       ))}

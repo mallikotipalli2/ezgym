@@ -72,8 +72,22 @@ CREATE INDEX idx_sets_user_id ON workout_sets(user_id);
 CREATE INDEX idx_sets_exercise_id ON workout_sets(exercise_id);
 CREATE INDEX idx_sets_workout_id ON workout_sets(workout_id);
 
+-- Gym sessions table
+CREATE TABLE gym_sessions (
+  id TEXT PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  started_at TIMESTAMPTZ NOT NULL,
+  ended_at TIMESTAMPTZ,
+  duration_ms INTEGER NOT NULL DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'completed', 'discarded'))
+);
+
+CREATE INDEX idx_gym_sessions_user_id ON gym_sessions(user_id);
+CREATE INDEX idx_gym_sessions_status ON gym_sessions(status);
+
 -- RLS disabled — access control handled at API layer via JWT
 ALTER TABLE users DISABLE ROW LEVEL SECURITY;
 ALTER TABLE workouts DISABLE ROW LEVEL SECURITY;
 ALTER TABLE exercises DISABLE ROW LEVEL SECURITY;
 ALTER TABLE workout_sets DISABLE ROW LEVEL SECURITY;
+ALTER TABLE gym_sessions DISABLE ROW LEVEL SECURITY;

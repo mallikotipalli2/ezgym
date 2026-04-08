@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { GymToggle } from '@/components/ui/GymToggle';
 
 interface HeaderProps {
   title: string;
@@ -22,6 +23,7 @@ export const Header = ({ title, subtitle, action, hideThemeToggle, className }: 
       <div className="flex items-center gap-2 flex-shrink-0">
         {action}
         {!hideThemeToggle && <ThemeToggle />}
+        <GymToggle />
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { LogIn, LogOut, Shield, Wifi, WifiOff, Lock } from 'lucide-react';
+import { LogIn, LogOut, Shield, Wifi, WifiOff, Lock, Trash2, AlertTriangle, Database } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Header } from '@/components/layout/Header';
 import { Card } from '@/components/ui/Card';
@@ -14,6 +14,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useSyncListener } from '@/hooks/useSyncListener';
 import { getProfile } from '@/lib/db';
+import { clearLocalData } from '@/lib/sync';
 import type { Profile as ProfileType } from '@/types';
 
 const container = {
@@ -26,12 +27,14 @@ const item = {
 };
 
 export const Profile = () => {
-  const { user, signOut, isOnline, isAuthenticated } = useAuth();
-  const { totalWorkouts, totalVolume, streak } = useAnalytics();
+  const { user, signOut, isOnline, isAuthenticated, deleteAccount } = useAuth();
+  const { totalWorkouts, totalVolume, streak, refresh } = useAnalytics();
   const [profile, setProfile] = useState<ProfileType | null>(null);
   const [showEdit, setShowEdit] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
+  const [showClearData, setShowClearData] = useState(false);
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
 
   useEffect(() => {
     getProfile().then((p) => setProfile(p || null));
@@ -44,6 +47,13 @@ export const Profile = () => {
   const handleSave = (updated: ProfileType) => {
     setProfile(updated);
     setShowEdit(false);
+  };
+
+  const handleClearData = async () => {
+    await clearLocalData();
+    setProfile(null);
+    refresh();
+    setShowClearData(false);
   };
 
   return (
@@ -115,10 +125,37 @@ export const Profile = () => {
                   <span className="text-sm font-medium">Change Password</span>
                 </button>
               </Card>
-              <Button variant="danger" fullWidth onClick={signOut}>
+
+              <Button variant="secondary" fullWidth onClick={signOut}>
                 <LogOut size={18} />
                 Sign Out
               </Button>
+
+              <Card padding="none">
+                <button
+                  onClick={() => setShowClearData(true)}
+                  className="w-full flex items-center gap-3 p-4 active:bg-surface-800/50 transition-colors"
+                >
+                  <Database size={18} className="text-amber-400" />
+                  <div className="text-left">
+                    <span className="text-sm font-medium">Clear Local Data</span>
+                    <p className="text-xs text-surface-500">Remove cached workouts from this device</p>
+                  </div>
+                </button>
+              </Card>
+
+              <Card padding="none">
+                <button
+                  onClick={() => setShowDeleteAccount(true)}
+                  className="w-full flex items-center gap-3 p-4 active:bg-surface-800/50 transition-colors"
+                >
+                  <Trash2 size={18} className="text-danger-400" />
+                  <div className="text-left">
+                    <span className="text-sm font-medium text-danger-400">Delete Account</span>
+                    <p className="text-xs text-surface-500">Permanently remove your account and all data</p>
+                  </div>
+                </button>
+              </Card>
             </div>
           ) : (
             <Card padding="md">
@@ -163,6 +200,19 @@ export const Profile = () => {
       {/* Change password modal */}
       <Modal open={showChangePassword} onClose={() => setShowChangePassword(false)} title="Change Password">
         <ChangePasswordForm onClose={() => setShowChangePassword(false)} />
+      </Modal>
+
+      {/* Clear data confirmation modal */}
+      <Modal open={showClearData} onClose={() => setShowClearData(false)} size="sm">
+        <ClearDataConfirm
+          onConfirm={handleClearData}
+          onCancel={() => setShowClearData(false)}
+        />
+      </Modal>
+
+      {/* Delete account confirmation modal */}
+      <Modal open={showDeleteAccount} onClose={() => setShowDeleteAccount(false)} size="sm">
+        <DeleteAccountConfirm onClose={() => setShowDeleteAccount(false)} />
       </Modal>
     </PageContainer>
   );
@@ -360,6 +410,122 @@ const ChangePasswordForm = ({ onClose }: { onClose: () => void }) => {
       <Button variant="primary" size="lg" fullWidth type="submit" loading={loading}>
         Change Password
       </Button>
+    </form>
+  );
+};
+
+// ── Clear Data Confirmation ──
+const ClearDataConfirm = ({ onConfirm, onCancel }: { onConfirm: () => void; onCancel: () => void }) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleConfirm = async () => {
+    setLoading(true);
+    await onConfirm();
+    setLoading(false);
+  };
+
+  return (
+    <div className="text-center space-y-4">
+      <div className="w-14 h-14 rounded-2xl bg-amber-500/15 flex items-center justify-center mx-auto">
+        <Database size={28} className="text-amber-400" />
+      </div>
+      <div>
+        <h3 className="text-lg font-bold">Clear Local Data?</h3>
+        <p className="text-sm text-surface-400 mt-1">
+          This removes all cached workout data from this device. Your cloud data stays safe and will sync back on next login.
+        </p>
+      </div>
+      <div className="flex gap-3">
+        <Button variant="secondary" fullWidth onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button variant="danger" fullWidth onClick={handleConfirm} loading={loading}>
+          Clear Data
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+// ── Delete Account Confirmation ──
+const DeleteAccountConfirm = ({ onClose }: { onClose: () => void }) => {
+  const { deleteAccount } = useAuth();
+  const [password, setPassword] = useState('');
+  const [confirmText, setConfirmText] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const canDelete = confirmText === 'DELETE' && password.length > 0;
+
+  const handleDelete = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!canDelete) return;
+    setError('');
+    setLoading(true);
+
+    const result = await deleteAccount(password);
+    if (result.error) {
+      setError(result.error);
+      setLoading(false);
+    } else {
+      onClose();
+    }
+  };
+
+  return (
+    <form onSubmit={handleDelete} className="space-y-4">
+      <div className="text-center">
+        <div className="w-14 h-14 rounded-2xl bg-danger-500/15 flex items-center justify-center mx-auto mb-3">
+          <AlertTriangle size={28} className="text-danger-400" />
+        </div>
+        <h3 className="text-lg font-bold">Delete Account?</h3>
+        <p className="text-sm text-surface-400 mt-1">
+          This <span className="text-danger-400 font-semibold">permanently deletes</span> your account, all workouts, exercises, and progress. This cannot be undone.
+        </p>
+      </div>
+
+      <Input
+        label="Enter your password"
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="••••••••"
+        icon={<KeyRound size={18} />}
+        required
+      />
+
+      <div>
+        <label className="block text-sm font-medium mb-1.5">
+          Type <span className="text-danger-400 font-mono">DELETE</span> to confirm
+        </label>
+        <input
+          type="text"
+          value={confirmText}
+          onChange={(e) => setConfirmText(e.target.value)}
+          placeholder="DELETE"
+          className="w-full rounded-xl border border-surface-700 bg-surface-800 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-danger-500/50 focus:border-danger-500 placeholder:text-surface-600"
+        />
+      </div>
+
+      {error && (
+        <p className="text-sm text-danger-400 bg-danger-500/10 rounded-xl p-3">{error}</p>
+      )}
+
+      <div className="flex gap-3">
+        <Button variant="secondary" fullWidth onClick={onClose} type="button">
+          Cancel
+        </Button>
+        <Button
+          variant="danger"
+          fullWidth
+          type="submit"
+          loading={loading}
+          disabled={!canDelete}
+        >
+          <Trash2 size={16} />
+          Delete Forever
+        </Button>
+      </div>
     </form>
   );
 };

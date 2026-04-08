@@ -16,6 +16,7 @@ interface AuthState {
   signIn: (username: string, password: string) => Promise<{ error?: string }>;
   signOut: () => void;
   changePassword: (currentPassword: string, newPassword: string) => Promise<{ error?: string }>;
+  deleteAccount: (password: string) => Promise<{ error?: string }>;
   isOnline: boolean;
   isAuthenticated: boolean;
 }
@@ -159,6 +160,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  const deleteAccount = useCallback(async (password: string) => {
+    try {
+      const res = await fetch(`${getApiBase()}/api/auth/delete-account`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders(),
+        },
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json();
+      if (!res.ok) return { error: data.error || 'Failed to delete account' };
+      clearAuth();
+      setUser(null);
+      await clearLocalData();
+      return {};
+    } catch {
+      return { error: 'Network error. Try again.' };
+    }
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -168,6 +190,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         signIn,
         signOut,
         changePassword,
+        deleteAccount,
         isOnline,
         isAuthenticated: !!user,
       }}

@@ -80,8 +80,11 @@ export const syncToRemote = async (): Promise<void> => {
     const unsyncedWorkouts = await db.workouts.filter((w) => w.synced === false).toArray();
     const unsyncedExercises = await db.exercises.filter((e) => e.synced === false).toArray();
     const unsyncedSets = await db.sets.filter((s) => s.synced === false).toArray();
+    const unsyncedGymSessions = await db.gymSessions.filter((g) => g.synced === false && g.status !== 'active').toArray();
 
-    if (!unsyncedWorkouts.length && !unsyncedExercises.length && !unsyncedSets.length) {
+    const hasUnsynced = unsyncedWorkouts.length || unsyncedExercises.length || unsyncedSets.length || unsyncedGymSessions.length;
+
+    if (!hasUnsynced) {
       await syncProfileToRemote();
       return;
     }
@@ -96,6 +99,7 @@ export const syncToRemote = async (): Promise<void> => {
         workouts: unsyncedWorkouts,
         exercises: unsyncedExercises,
         sets: unsyncedSets,
+        gymSessions: unsyncedGymSessions,
       }),
     });
 
@@ -104,6 +108,7 @@ export const syncToRemote = async (): Promise<void> => {
         ...unsyncedWorkouts.map((w) => db.workouts.update(w.id, { synced: true })),
         ...unsyncedExercises.map((e) => db.exercises.update(e.id, { synced: true })),
         ...unsyncedSets.map((s) => db.sets.update(s.id, { synced: true })),
+        ...unsyncedGymSessions.map((g) => db.gymSessions.update(g.id, { synced: true })),
       ]);
     }
 
@@ -125,7 +130,7 @@ export const syncFromRemote = async (): Promise<void> => {
 
     if (!res.ok) return;
 
-    const { workouts, exercises, sets } = await res.json();
+    const { workouts, exercises, sets, gymSessions } = await res.json();
 
     for (const rw of workouts || []) {
       const mapped = {
@@ -186,6 +191,24 @@ export const syncFromRemote = async (): Promise<void> => {
       }
     }
 
+    for (const rg of gymSessions || []) {
+      const mapped = {
+        id: rg.id,
+        userId: rg.user_id,
+        startedAt: rg.started_at,
+        endedAt: rg.ended_at,
+        durationMs: rg.duration_ms,
+        status: rg.status,
+        synced: true,
+      };
+      const local = await db.gymSessions.get(rg.id);
+      if (!local) {
+        await db.gymSessions.add(mapped);
+      } else if (local.synced !== false) {
+        await db.gymSessions.put(mapped);
+      }
+    }
+
     await syncProfileFromRemote();
     notifySynced();
   } catch (err) {
@@ -198,6 +221,7 @@ export const clearLocalData = async (): Promise<void> => {
   await db.exercises.clear();
   await db.sets.clear();
   await db.profiles.clear();
+  await db.gymSessions.clear();
 };
 
 export const startAutoSync = (intervalMs = 5000): (() => void) => {

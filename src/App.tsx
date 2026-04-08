@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useEffect } from 'react';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { ThemeProvider } from '@/context/ThemeContext';
+import { GymProvider } from '@/context/GymContext';
 import { Navigation } from '@/components/layout/Navigation';
 import { Dashboard } from '@/pages/Dashboard';
 import { Workout } from '@/pages/Workout';
@@ -27,17 +28,19 @@ export default function App() {
     <BrowserRouter>
       <ThemeProvider>
         <AuthProvider>
-          <SyncManager>
-            <div className="min-h-screen bg-surface-950">
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/workout" element={<Workout />} />
-                <Route path="/progress" element={<Progress />} />
-                <Route path="/profile" element={<Profile />} />
-              </Routes>
-              <Navigation />
-            </div>
-          </SyncManager>
+          <GymProvider>
+            <SyncManager>
+              <div className="min-h-screen bg-surface-950">
+                <Routes>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/workout" element={<Workout />} />
+                  <Route path="/progress" element={<Progress />} />
+                  <Route path="/profile" element={<Profile />} />
+                </Routes>
+                <Navigation />
+              </div>
+            </SyncManager>
+          </GymProvider>
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>
