@@ -15,7 +15,7 @@ function formatStopwatch(ms: number): string {
 }
 
 export const GymToggle = () => {
-  const { isAtGym, elapsedMs, startGym, stopGym, discardSession, confirmShortSession } = useGym();
+  const { isAtGym, elapsedMs, startGym, stopGym, resumeGym, discardSession, confirmShortSession } = useGym();
   const [showShortModal, setShowShortModal] = useState(false);
   const [pendingAction, setPendingAction] = useState(false);
 
@@ -42,6 +42,11 @@ export const GymToggle = () => {
     await discardSession();
     setShowShortModal(false);
     setPendingAction(false);
+  };
+
+  const handleCancel = () => {
+    resumeGym();
+    setShowShortModal(false);
   };
 
   return (
@@ -78,7 +83,7 @@ export const GymToggle = () => {
       {/* Short session modal */}
       <AnimatePresence>
         {showShortModal && (
-          <Modal open={showShortModal} onClose={handleDiscard} size="sm">
+          <Modal open={showShortModal} onClose={handleCancel} size="sm">
             <div className="text-center space-y-4">
               <div className="w-14 h-14 rounded-2xl bg-amber-500/15 flex items-center justify-center mx-auto">
                 <Timer size={28} className="text-amber-400" />

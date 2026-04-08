@@ -9,6 +9,7 @@ interface GymContextState {
   elapsedMs: number;
   startGym: () => Promise<void>;
   stopGym: () => Promise<'completed' | 'short'>;
+  resumeGym: () => void;
   discardSession: () => Promise<void>;
   confirmShortSession: () => Promise<void>;
 }
@@ -87,6 +88,13 @@ export const GymProvider = ({ children }: { children: ReactNode }) => {
     return 'completed';
   }, [session, stopTimer]);
 
+  const resumeGym = useCallback(() => {
+    pendingSessionRef.current = null;
+    if (session) {
+      startTimer(session.startedAt);
+    }
+  }, [session, startTimer]);
+
   const confirmShortSession = useCallback(async () => {
     const pending = pendingSessionRef.current;
     if (!pending) return;
@@ -120,6 +128,7 @@ export const GymProvider = ({ children }: { children: ReactNode }) => {
         elapsedMs,
         startGym,
         stopGym,
+        resumeGym,
         discardSession,
         confirmShortSession,
       }}
