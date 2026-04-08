@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
+import { clearLocalData, syncFromRemote } from '@/lib/sync';
 
 const TOKEN_KEY = 'ezgym:token';
 const USER_KEY = 'ezgym:user';
@@ -98,6 +99,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signUp = useCallback(async (username: string, password: string) => {
     try {
+      await clearLocalData();
       const res = await fetch(`${getApiBase()}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -107,6 +109,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!res.ok) return { error: data.error || 'Registration failed' };
       storeAuth(data.token, data.user);
       setUser(data.user);
+      syncFromRemote().catch(() => {});
       return {};
     } catch {
       return { error: 'Network error. Try again.' };
@@ -115,6 +118,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = useCallback(async (username: string, password: string) => {
     try {
+      await clearLocalData();
       const res = await fetch(`${getApiBase()}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -124,15 +128,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!res.ok) return { error: data.error || 'Login failed' };
       storeAuth(data.token, data.user);
       setUser(data.user);
+      syncFromRemote().catch(() => {});
       return {};
     } catch {
       return { error: 'Network error. Try again.' };
     }
   }, []);
 
-  const signOut = useCallback(() => {
+  const signOut = useCallback(async () => {
     clearAuth();
     setUser(null);
+    await clearLocalData();
   }, []);
 
   const changePassword = useCallback(async (currentPassword: string, newPassword: string) => {

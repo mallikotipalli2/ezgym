@@ -13,6 +13,7 @@ import {
   getSetsForWorkout,
   discardWorkout as dbDiscardWorkout,
 } from '@/lib/db';
+import { useSyncListener } from '@/hooks/useSyncListener';
 import { generateId } from '@/lib/utils';
 import type { Workout, Exercise, WorkoutSet, WorkoutType, WorkoutSummaryData } from '@/types';
 
@@ -48,6 +49,8 @@ export const useWorkout = () => {
   useEffect(() => {
     loadActiveWorkout();
   }, [loadActiveWorkout]);
+
+  useSyncListener(loadActiveWorkout);
 
   const startWorkout = useCallback(async (type: WorkoutType, name: string) => {
     const workout: Workout = {

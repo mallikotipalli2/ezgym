@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { StreakDisplay } from '@/components/analytics/StreakDisplay';
 import { useAnalytics } from '@/hooks/useAnalytics';
+import { useSyncListener } from '@/hooks/useSyncListener';
 import { getProfile, getActiveWorkout } from '@/lib/db';
 import { getDaysAgo, getWorkoutTypeBg, getWorkoutTypeIcon, formatDurationShort } from '@/lib/utils';
 import type { Profile, Workout } from '@/types';
@@ -36,6 +37,12 @@ export const Dashboard = () => {
     getActiveWorkout().then((w) => setActiveWorkout(w || null));
     refresh();
   }, [refresh]);
+
+  useSyncListener(() => {
+    getProfile().then((p) => setProfile(p || null));
+    getActiveWorkout().then((w) => setActiveWorkout(w || null));
+    refresh();
+  });
 
   const greeting = () => {
     const hour = new Date().getHours();

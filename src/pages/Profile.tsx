@@ -12,6 +12,7 @@ import { ProfileForm } from '@/components/profile/ProfileForm';
 import { StatsCard } from '@/components/profile/StatsCard';
 import { useAuth } from '@/context/AuthContext';
 import { useAnalytics } from '@/hooks/useAnalytics';
+import { useSyncListener } from '@/hooks/useSyncListener';
 import { getProfile } from '@/lib/db';
 import type { Profile as ProfileType } from '@/types';
 
@@ -35,6 +36,10 @@ export const Profile = () => {
   useEffect(() => {
     getProfile().then((p) => setProfile(p || null));
   }, []);
+
+  useSyncListener(() => {
+    getProfile().then((p) => setProfile(p || null));
+  });
 
   const handleSave = (updated: ProfileType) => {
     setProfile(updated);
@@ -151,7 +156,7 @@ export const Profile = () => {
       </Modal>
 
       {/* Auth modal */}
-      <Modal open={showAuth} onClose={() => setShowAuth(false)} title="Sign In">
+      <Modal open={showAuth} onClose={() => setShowAuth(false)}>
         <AuthForm onClose={() => setShowAuth(false)} />
       </Modal>
 
@@ -164,22 +169,36 @@ export const Profile = () => {
 };
 
 // ── Auth Form (username + password) ──
-import { User, KeyRound } from 'lucide-react';
+import { User, KeyRound, UserPlus, LogIn as LogInIcon } from 'lucide-react';
 
 const AuthForm = ({ onClose }: { onClose: () => void }) => {
   const { signIn, signUp } = useAuth();
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const isSignUp = mode === 'signup';
+
+  const switchMode = () => {
+    setMode(isSignUp ? 'signin' : 'signup');
+    setError('');
+    setConfirmPassword('');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
 
-    const fn = mode === 'signin' ? signIn : signUp;
+    if (isSignUp && password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    setLoading(true);
+    const fn = isSignUp ? signUp : signIn;
     const result = await fn(username.trim(), password);
 
     if (result.error) {
@@ -192,42 +211,90 @@ const AuthForm = ({ onClose }: { onClose: () => void }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Header */}
+      <div className="text-center pb-1">
+        <div className="w-12 h-12 rounded-2xl bg-brand-500/15 flex items-center justify-center mx-auto mb-3">
+          {isSignUp ? (
+            <UserPlus size={24} className="text-brand-400" />
+          ) : (
+            <LogInIcon size={24} className="text-brand-400" />
+          )}
+        </div>
+        <h2 className="text-xl font-bold">
+          {isSignUp ? 'Create Account' : 'Welcome Back'}
+        </h2>
+        <p className="text-sm text-surface-400 mt-1">
+          {isSignUp
+            ? 'Sign up to sync workouts across all your devices'
+            : 'Sign in to access your workouts and progress'}
+        </p>
+      </div>
+
       <Input
         label="Username"
         type="text"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
-        placeholder="your_username"
+        placeholder={isSignUp ? 'Choose a username' : 'Enter your username'}
         icon={<User size={18} />}
         autoComplete="username"
         required
       />
+      {isSignUp && (
+        <p className="text-xs text-surface-500 -mt-2 ml-1">3–20 characters, lowercase</p>
+      )}
+
       <Input
         label="Password"
         type="password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        placeholder="••••••••"
+        placeholder={isSignUp ? 'Create a password' : 'Enter your password'}
         icon={<KeyRound size={18} />}
-        autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
+        autoComplete={isSignUp ? 'new-password' : 'current-password'}
         required
       />
+      {isSignUp && (
+        <p className="text-xs text-surface-500 -mt-2 ml-1">4–64 characters</p>
+      )}
+
+      {isSignUp && (
+        <Input
+          label="Confirm Password"
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder="Re-enter your password"
+          icon={<KeyRound size={18} />}
+          autoComplete="new-password"
+          required
+        />
+      )}
 
       {error && (
         <p className="text-sm text-danger-400 bg-danger-500/10 rounded-xl p-3">{error}</p>
       )}
 
       <Button variant="primary" size="lg" fullWidth type="submit" loading={loading}>
-        {mode === 'signin' ? 'Sign In' : 'Create Account'}
+        {isSignUp ? 'Create Account' : 'Sign In'}
       </Button>
+
+      <div className="relative py-1">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-surface-700" />
+        </div>
+        <div className="relative flex justify-center">
+          <span className="bg-surface-900 px-3 text-xs text-surface-500">or</span>
+        </div>
+      </div>
 
       <button
         type="button"
-        onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(''); }}
-        className="w-full text-center text-sm text-brand-400 hover:text-brand-300"
+        onClick={switchMode}
+        className="w-full text-center text-sm text-brand-400 hover:text-brand-300 font-medium py-2"
       >
-        {mode === 'signin' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+        {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
       </button>
     </form>
   );

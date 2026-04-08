@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getCompletedWorkouts, getAllSets, getExercisesForWorkout } from '@/lib/db';
+import { useSyncListener } from '@/hooks/useSyncListener';
 import { isSameDay, startOfDay } from '@/lib/utils';
 import type {
   Workout,
@@ -30,6 +31,8 @@ export const useAnalytics = () => {
   useEffect(() => {
     refresh();
   }, [refresh]);
+
+  useSyncListener(refresh);
 
   const totalWorkouts = workouts.length;
 

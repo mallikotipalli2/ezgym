@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Avatar } from '@/components/ui/Avatar';
 import { saveProfile, getProfile } from '@/lib/db';
+import { syncProfileToRemote } from '@/lib/sync';
 import { generateId } from '@/lib/utils';
 import type { Profile } from '@/types';
 
@@ -21,9 +22,23 @@ export const ProfileForm = ({ profile, onSave }: ProfileFormProps) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Resize to max 200x200 to keep base64 small
     const reader = new FileReader();
     reader.onloadend = () => {
-      setAvatarUrl(reader.result as string);
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxSize = 200;
+        let w = img.width;
+        let h = img.height;
+        if (w > h) { h = (h / w) * maxSize; w = maxSize; }
+        else { w = (w / h) * maxSize; h = maxSize; }
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d')!.drawImage(img, 0, 0, w, h);
+        setAvatarUrl(canvas.toDataURL('image/jpeg', 0.8));
+      };
+      img.src = reader.result as string;
     };
     reader.readAsDataURL(file);
   };
@@ -42,6 +57,8 @@ export const ProfileForm = ({ profile, onSave }: ProfileFormProps) => {
       };
       await saveProfile(updated);
       onSave(updated);
+      // Push to server immediately
+      syncProfileToRemote().catch(() => {});
     } finally {
       setSaving(false);
     }

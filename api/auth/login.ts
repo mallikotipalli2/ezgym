@@ -32,7 +32,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, username, password_hash')
+      .select('id, username, password_hash, display_name, avatar_url')
       .eq('username', trimmedUsername)
       .single();
 
@@ -53,7 +53,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     return res.status(200).json({
       token,
-      user: { id: user.id, username: user.username },
+      user: {
+        id: user.id,
+        username: user.username,
+        displayName: user.display_name || '',
+        avatarUrl: user.avatar_url || '',
+      },
     });
   } catch (err) {
     console.error('Login error:', err);

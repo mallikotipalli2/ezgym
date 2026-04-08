@@ -1,12 +1,75 @@
 import { db } from './db';
 import { getAuthHeaders, isAuthenticated } from '@/context/AuthContext';
-import type { Workout, Exercise, WorkoutSet } from '@/types';
 
 let syncInProgress = false;
 
 function getApiBase(): string {
   return import.meta.env.VITE_API_URL || '';
 }
+
+function notifySynced() {
+  window.dispatchEvent(new CustomEvent('ezgym:synced'));
+}
+
+export const syncProfileToRemote = async (): Promise<void> => {
+  if (!isAuthenticated()) return;
+
+  try {
+    const profile = await db.profiles.toCollection().first();
+    if (!profile || profile.synced !== false) return;
+
+    const res = await fetch(`${getApiBase()}/api/profile`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify({
+        displayName: profile.name || '',
+        avatarUrl: profile.avatarUrl || '',
+      }),
+    });
+
+    if (res.ok) {
+      await db.profiles.update(profile.id, { synced: true });
+    }
+  } catch (err) {
+    console.warn('Profile push failed:', err);
+  }
+};
+
+export const syncProfileFromRemote = async (): Promise<void> => {
+  if (!isAuthenticated()) return;
+
+  try {
+    const res = await fetch(`${getApiBase()}/api/profile`, {
+      headers: getAuthHeaders(),
+    });
+
+    if (!res.ok) return;
+
+    const { profile: remote } = await res.json();
+    if (!remote) return;
+
+    const local = await db.profiles.toCollection().first();
+
+    // Only overwrite if local isn't dirty
+    if (!local || local.synced !== false) {
+      const mapped = {
+        id: local?.id || 'default',
+        name: remote.displayName || local?.name || '',
+        avatarUrl: remote.avatarUrl || local?.avatarUrl || '',
+        theme: local?.theme || ('dark' as const),
+        createdAt: remote.createdAt || local?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        synced: true,
+      };
+      await db.profiles.put(mapped);
+    }
+  } catch (err) {
+    console.warn('Profile pull failed:', err);
+  }
+};
 
 export const syncToRemote = async (): Promise<void> => {
   if (!isAuthenticated() || syncInProgress) return;
@@ -18,7 +81,10 @@ export const syncToRemote = async (): Promise<void> => {
     const unsyncedExercises = await db.exercises.filter((e) => e.synced === false).toArray();
     const unsyncedSets = await db.sets.filter((s) => s.synced === false).toArray();
 
-    if (!unsyncedWorkouts.length && !unsyncedExercises.length && !unsyncedSets.length) return;
+    if (!unsyncedWorkouts.length && !unsyncedExercises.length && !unsyncedSets.length) {
+      await syncProfileToRemote();
+      return;
+    }
 
     const res = await fetch(`${getApiBase()}/api/workouts`, {
       method: 'PUT',
@@ -40,6 +106,8 @@ export const syncToRemote = async (): Promise<void> => {
         ...unsyncedSets.map((s) => db.sets.update(s.id, { synced: true })),
       ]);
     }
+
+    await syncProfileToRemote();
   } catch (err) {
     console.warn('Sync push failed, will retry:', err);
   } finally {
@@ -60,7 +128,7 @@ export const syncFromRemote = async (): Promise<void> => {
     const { workouts, exercises, sets } = await res.json();
 
     for (const rw of workouts || []) {
-      const mapped: Workout = {
+      const mapped = {
         id: rw.id,
         userId: rw.user_id,
         type: rw.type,
@@ -80,7 +148,7 @@ export const syncFromRemote = async (): Promise<void> => {
     }
 
     for (const re of exercises || []) {
-      const mapped: Exercise = {
+      const mapped = {
         id: re.id,
         workoutId: re.workout_id,
         name: re.name,
@@ -98,7 +166,7 @@ export const syncFromRemote = async (): Promise<void> => {
     }
 
     for (const rs of sets || []) {
-      const mapped: WorkoutSet = {
+      const mapped = {
         id: rs.id,
         exerciseId: rs.exercise_id,
         workoutId: rs.workout_id,
@@ -117,13 +185,27 @@ export const syncFromRemote = async (): Promise<void> => {
         await db.sets.put(mapped);
       }
     }
+
+    await syncProfileFromRemote();
+    notifySynced();
   } catch (err) {
     console.warn('Sync pull failed:', err);
   }
 };
 
+export const clearLocalData = async (): Promise<void> => {
+  await db.workouts.clear();
+  await db.exercises.clear();
+  await db.sets.clear();
+  await db.profiles.clear();
+};
+
 export const startAutoSync = (intervalMs = 5000): (() => void) => {
-  const handle = setInterval(() => syncToRemote(), intervalMs);
+  // Push every 5s
+  const pushHandle = setInterval(() => syncToRemote(), intervalMs);
+  // Pull every 15s
+  const pullHandle = setInterval(() => syncFromRemote(), intervalMs * 3);
+
   syncToRemote();
 
   const handleVisibility = () => {
@@ -135,7 +217,8 @@ export const startAutoSync = (intervalMs = 5000): (() => void) => {
   document.addEventListener('visibilitychange', handleVisibility);
 
   return () => {
-    clearInterval(handle);
+    clearInterval(pushHandle);
+    clearInterval(pullHandle);
     document.removeEventListener('visibilitychange', handleVisibility);
   };
 };

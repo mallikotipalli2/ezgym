@@ -67,7 +67,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     return res.status(201).json({
       token,
-      user: { id: user.id, username: user.username },
+      user: {
+        id: user.id,
+        username: user.username,
+        displayName: '',
+        avatarUrl: '',
+      },
     });
   } catch (err) {
     console.error('Register error:', err);
