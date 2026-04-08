@@ -76,7 +76,7 @@ export const Profile = () => {
               {profile?.name || user?.username || 'Athlete'}
             </h2>
             <p className="text-sm text-surface-400 mt-0.5">
-              {isAuthenticated ? `@${user?.username}` : 'Guest mode — local data only'}
+              {isAuthenticated ? (<>User Id: <span className="font-medium text-surface-300">{user?.username}</span></>) : 'Guest mode — local data only'}
             </p>
             <div className="flex items-center justify-center gap-1 mt-2">
               {isOnline ? (

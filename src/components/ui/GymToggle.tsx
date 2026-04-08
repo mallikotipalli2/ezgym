@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Timer, Square } from 'lucide-react';
+import { Timer } from 'lucide-react';
 import { useGym } from '@/context/GymContext';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
@@ -66,15 +66,12 @@ export const GymToggle = () => {
               transition={{ duration: 1.5, repeat: Infinity }}
             />
             <span className="whitespace-nowrap">@GYM</span>
-            <span className="font-mono text-[11px] text-emerald-300 tabular-nums ml-0.5">
+            <span className="font-mono text-[11px] text-red-400 tabular-nums ml-0.5">
               {formatStopwatch(elapsedMs)}
             </span>
           </>
         ) : (
-          <>
-            <Timer size={15} />
-            <span>@GYM</span>
-          </>
+          <span>@GYM</span>
         )}
       </motion.button>
 

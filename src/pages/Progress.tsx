@@ -5,6 +5,7 @@ import { WeeklyChart } from '@/components/analytics/WeeklyChart';
 import { StreakDisplay } from '@/components/analytics/StreakDisplay';
 import { VolumeChart } from '@/components/analytics/VolumeChart';
 import { PersonalRecords } from '@/components/analytics/PersonalRecords';
+import { GymTimeCard } from '@/components/analytics/GymTimeCard';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { useAnalytics } from '@/hooks/useAnalytics';
@@ -48,9 +49,10 @@ export const Progress = () => {
     return (
       <PageContainer>
         <Header title="Progress" subtitle="Track your fitness journey" />
-        <Card padding="lg" className="text-center mt-8">
+        <GymTimeCard />
+        <Card padding="lg" className="text-center mt-4">
           <BarChart3 size={48} className="mx-auto text-surface-600 mb-3" />
-          <h3 className="text-lg font-semibold text-white mb-1">No data yet</h3>
+          <h3 className="text-lg font-semibold text-white mb-1">No workout data yet</h3>
           <p className="text-sm text-surface-400">
             Complete your first workout to start seeing progress analytics.
           </p>
@@ -85,6 +87,10 @@ export const Progress = () => {
 
         <motion.div variants={item}>
           <PersonalRecords getRecords={getPersonalRecords} />
+        </motion.div>
+
+        <motion.div variants={item}>
+          <GymTimeCard />
         </motion.div>
 
         {/* Workout history */}

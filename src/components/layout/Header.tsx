@@ -22,8 +22,8 @@ export const Header = ({ title, subtitle, action, hideThemeToggle, className }: 
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
         {action}
-        {!hideThemeToggle && <ThemeToggle />}
         <GymToggle />
+        {!hideThemeToggle && <ThemeToggle />}
       </div>
     </div>
   );
