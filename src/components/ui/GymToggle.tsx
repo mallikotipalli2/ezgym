@@ -78,7 +78,7 @@ export const GymToggle = () => {
       {/* Short session modal */}
       <AnimatePresence>
         {showShortModal && (
-          <Modal open={showShortModal} onClose={() => {}} size="sm">
+          <Modal open={showShortModal} onClose={handleDiscard} size="sm">
             <div className="text-center space-y-4">
               <div className="w-14 h-14 rounded-2xl bg-amber-500/15 flex items-center justify-center mx-auto">
                 <Timer size={28} className="text-amber-400" />

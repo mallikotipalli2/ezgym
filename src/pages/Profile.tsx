@@ -115,48 +115,45 @@ export const Profile = () => {
           <h3 className="text-sm font-semibold">Account</h3>
 
           {isAuthenticated ? (
-            <div className="space-y-2">
-              <Card padding="none">
-                <button
-                  onClick={() => setShowChangePassword(true)}
-                  className="w-full flex items-center gap-3 p-4 active:bg-surface-800/50 transition-colors"
-                >
-                  <Lock size={18} className="text-surface-400" />
-                  <span className="text-sm font-medium">Change Password</span>
-                </button>
-              </Card>
+            <Card padding="none" className="divide-y divide-surface-800 overflow-hidden">
+              <button
+                onClick={() => setShowChangePassword(true)}
+                className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-surface-800/50 active:bg-surface-800/70 transition-colors"
+              >
+                <Lock size={18} className="text-brand-400" />
+                <span className="text-sm font-medium">Change Password</span>
+              </button>
 
-              <Button variant="secondary" fullWidth onClick={signOut}>
-                <LogOut size={18} />
-                Sign Out
-              </Button>
+              <button
+                onClick={signOut}
+                className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-surface-800/50 active:bg-surface-800/70 transition-colors"
+              >
+                <LogOut size={18} className="text-surface-400" />
+                <span className="text-sm font-medium">Sign Out</span>
+              </button>
 
-              <Card padding="none">
-                <button
-                  onClick={() => setShowClearData(true)}
-                  className="w-full flex items-center gap-3 p-4 active:bg-surface-800/50 transition-colors"
-                >
-                  <Database size={18} className="text-amber-400" />
-                  <div className="text-left">
-                    <span className="text-sm font-medium">Clear Local Data</span>
-                    <p className="text-xs text-surface-500">Remove cached workouts from this device</p>
-                  </div>
-                </button>
-              </Card>
+              <button
+                onClick={() => setShowClearData(true)}
+                className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-surface-800/50 active:bg-surface-800/70 transition-colors"
+              >
+                <Database size={18} className="text-amber-400" />
+                <div className="text-left">
+                  <span className="text-sm font-medium">Clear Local Data</span>
+                  <p className="text-xs text-surface-500">Remove cached workouts from this device</p>
+                </div>
+              </button>
 
-              <Card padding="none">
-                <button
-                  onClick={() => setShowDeleteAccount(true)}
-                  className="w-full flex items-center gap-3 p-4 active:bg-surface-800/50 transition-colors"
-                >
-                  <Trash2 size={18} className="text-danger-400" />
-                  <div className="text-left">
-                    <span className="text-sm font-medium text-danger-400">Delete Account</span>
-                    <p className="text-xs text-surface-500">Permanently remove your account and all data</p>
-                  </div>
-                </button>
-              </Card>
-            </div>
+              <button
+                onClick={() => setShowDeleteAccount(true)}
+                className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-surface-800/50 active:bg-surface-800/70 transition-colors"
+              >
+                <Trash2 size={18} className="text-danger-400" />
+                <div className="text-left">
+                  <span className="text-sm font-medium text-danger-400">Delete Account</span>
+                  <p className="text-xs text-surface-500">Permanently remove your account and all data</p>
+                </div>
+              </button>
+            </Card>
           ) : (
             <Card padding="md">
               <div className="flex items-start gap-3">
