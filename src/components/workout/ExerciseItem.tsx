@@ -29,10 +29,10 @@ export const ExerciseItem = ({
 
   return (
     <motion.div
-      layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
+      exit={{ opacity: 0, height: 0, marginBottom: 0, overflow: 'hidden' }}
+      transition={{ duration: 0.2 }}
       className="bg-surface-850 border border-surface-800 rounded-2xl overflow-hidden"
     >
       {/* Header */}

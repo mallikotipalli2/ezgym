@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import {
   createWorkout as dbCreateWorkout,
   updateWorkout as dbUpdateWorkout,
@@ -22,9 +22,11 @@ export const useWorkout = () => {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [sets, setSets] = useState<Record<string, WorkoutSet[]>>({});
   const [loading, setLoading] = useState(true);
+  const initialLoadDone = useRef(false);
 
   const loadActiveWorkout = useCallback(async () => {
-    setLoading(true);
+    const isInitial = !initialLoadDone.current;
+    if (isInitial) setLoading(true);
     try {
       const workout = await getActiveWorkout();
       if (workout) {
@@ -42,7 +44,10 @@ export const useWorkout = () => {
         setSets({});
       }
     } finally {
-      setLoading(false);
+      if (isInitial) {
+        setLoading(false);
+        initialLoadDone.current = true;
+      }
     }
   }, []);
 

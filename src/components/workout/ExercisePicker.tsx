@@ -62,7 +62,6 @@ export const ExercisePicker = ({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full bg-surface-800 border border-surface-700 rounded-xl pl-10 pr-4 py-3 text-white placeholder:text-surface-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 text-base"
-          autoFocus
         />
         {search && (
           <button

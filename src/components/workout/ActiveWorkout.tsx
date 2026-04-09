@@ -85,7 +85,7 @@ export const ActiveWorkout = ({
       </div>
 
       {/* Exercises */}
-      <AnimatePresence mode="popLayout">
+      <AnimatePresence>
         {exercises.map((exercise) => (
           <ExerciseItem
             key={exercise.id}
@@ -139,9 +139,9 @@ export const ActiveWorkout = ({
         <ExercisePicker
           workoutType={workout.type}
           existingExercises={existingNames}
-          onSelect={(name, category) => {
-            onAddExercise(name, category);
+          onSelect={async (name, category) => {
             setShowPicker(false);
+            await onAddExercise(name, category);
           }}
           onClose={() => setShowPicker(false)}
         />

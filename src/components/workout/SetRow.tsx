@@ -40,7 +40,6 @@ export const SetRow = ({ set, exerciseId, onUpdate, onToggle, onRemove }: SetRow
 
   return (
     <motion.div
-      layout
       className={cn(
         'grid grid-cols-[2rem_1fr_1fr_2.5rem] gap-2 items-center',
         set.completed && 'opacity-70'
